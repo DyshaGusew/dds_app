@@ -15,6 +15,7 @@ class Status(models.Model):
     class Meta:
         verbose_name = "Статус"
         verbose_name_plural = "Статусы"
+        ordering = ['name']
 
 
 class Type(models.Model):
@@ -29,6 +30,7 @@ class Type(models.Model):
     class Meta:
         verbose_name = "Тип"
         verbose_name_plural = "Типы"
+        ordering = ['name']
 
 
 class Category(models.Model):
@@ -48,6 +50,7 @@ class Category(models.Model):
         unique_together = ['name', 'type'] # Уникальность комбинации названия категории и типа
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
+        ordering = ['name']
 
     def __str__(self):
         return f"{self.name} ({self.type.name})"
@@ -73,6 +76,7 @@ class SubCategory(models.Model):
         unique_together = ['name', 'category'] # Уникальность комбинации названия подкатегории и категории
         verbose_name = "Подкатегория"
         verbose_name_plural = "Подкатегории"
+        ordering = ['name']
 
     def __str__(self):
         return f"{self.name} ({self.category.name})"
@@ -130,17 +134,7 @@ class DDSRecord(models.Model):
     def __str__(self):
         return f"Запись {self.id} - {self.date_created} - {self.amount} руб."
 
-    def clean(self):
-        """
-        Валидация зависимостей между полями \n
-        Проверяет, что категория соответствует типу, а подкатегория — категории
-        """
-        from django.core.exceptions import ValidationError
-        if self.category.type != self.type:
-            raise ValidationError("Категория не соответствует выбранному типу.")
-        if self.sub_category.category != self.category:
-            raise ValidationError("Подкатегория не соответствует выбранной категории.")
-
     class Meta:
         verbose_name = "Запись ДДС"
         verbose_name_plural = "Записи ДДС"
+        ordering = ['-date_created']

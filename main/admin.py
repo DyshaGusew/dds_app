@@ -1,7 +1,11 @@
 from django.contrib import admin
+from django.http import JsonResponse
+from django.urls import path
 from .forms import DDSRecordAdminForm
 from main.models import Category, DDSRecord, Status, SubCategory, Type
 from django.contrib.auth.models import User, Group
+from rangefilter.filters import DateRangeFilter
+
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
@@ -48,9 +52,6 @@ class SubCategoryAdmin(admin.ModelAdmin):
     list_select_related = ('category', 'category__type')
 
     def category_type(self, obj):
-        """
-        Отображение типа категории в списке.
-        """
         return obj.category.type
     category_type.short_description = 'Тип категории'
 
@@ -60,7 +61,7 @@ class DDSRecordAdmin(admin.ModelAdmin):
     """
     Админ-панель для модели DDSRecord.
     """
-    form = DDSRecordAdminForm  # Используем кастомную форму с валидацией
+    form = DDSRecordAdminForm  # Кастомная форма с валидацией
     list_display = (
         'date_created',
         'status',
@@ -71,7 +72,7 @@ class DDSRecordAdmin(admin.ModelAdmin):
         'comment_short'
     )
     list_filter = (
-        'date_created',
+        ('date_created', DateRangeFilter),
         'status',
         'type',
         'category',
@@ -92,6 +93,7 @@ class DDSRecordAdmin(admin.ModelAdmin):
     )
     date_hierarchy = 'date_created'
     ordering = ('-date_created',)
+    autocomplete_fields = ('status', 'type')
     list_per_page = 20
 
     def comment_short(self, obj):
@@ -99,4 +101,25 @@ class DDSRecordAdmin(admin.ModelAdmin):
         Сокращенное отображение комментария в списке (до 50 символов).
         """
         return obj.comment[:50] + '...' if obj.comment and len(obj.comment) > 50 else obj.comment
+    
     comment_short.short_description = 'Комментарий'
+
+    # JavaScript для динамической фильтрации
+    class Media:
+        js = ('main/js/admin_dynamic_subcategory.js',)
+
+    # URL для получения подкатегорий через AJAX
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('get_subcategories/', self.admin_site.admin_view(self.get_subcategories), name='get_subcategories'),
+        ]
+        return custom_urls + urls
+
+    def get_subcategories(self, request):
+        """Возвращает список подкатегорий для выбранной категории в формате JSON."""
+        category_id = request.GET.get('category_id')
+        subcategories = []
+        if category_id:
+            subcategories = SubCategory.objects.filter(category_id=category_id).values('id', 'name')
+        return JsonResponse({'subcategories': list(subcategories)})
