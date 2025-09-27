@@ -1,3 +1,7 @@
+// Скрипт обеспечивает динамическую фильтрацию подкатегорий в форме админ-панели Django.
+// AJAX запрос к серверу
+// Ожидаемый формат ответа: { subcategories: [{ id: number, name: string }, ...] }
+
 document.addEventListener("DOMContentLoaded", function () {
     const categorySelect = document.getElementById("id_category");
     const subCategorySelect = document.getElementById("id_sub_category");
@@ -40,13 +44,13 @@ document.addEventListener("DOMContentLoaded", function () {
         };
         xhr.onerror = function () {
             console.error("Ошибка запроса подкатегорий");
+            alert("Не удалось загрузить подкатегории. Попробуйте позже.");
         };
         xhr.send();
     }
 
     // Обновление при смене категории
     categorySelect.addEventListener("change", function () {
-        // Сбрасываем выбранную подкатегорию
         subCategorySelect.value = "";
         updateSubCategories();
     });

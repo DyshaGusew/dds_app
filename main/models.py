@@ -138,3 +138,10 @@ class DDSRecord(models.Model):
         verbose_name = "Запись ДДС"
         verbose_name_plural = "Записи ДДС"
         ordering = ['-date_created']
+        indexes = [
+            models.Index(fields=['date_created']),
+            models.Index(fields=['status']),
+            models.Index(fields=['type']),
+            models.Index(fields=['category']),
+            models.Index(fields=['sub_category']),
+        ]

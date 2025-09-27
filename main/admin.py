@@ -1,10 +1,10 @@
 from django.contrib import admin
+from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from django.urls import path
+from rangefilter.filters import DateRangeFilter
 from .forms import DDSRecordAdminForm
 from main.models import Category, DDSRecord, Status, SubCategory, Type
-from django.contrib.auth.models import User, Group
-from rangefilter.filters import DateRangeFilter
 
 
 admin.site.unregister(User)
@@ -97,16 +97,13 @@ class DDSRecordAdmin(admin.ModelAdmin):
     list_per_page = 20
 
     def comment_short(self, obj):
-        """
-        Сокращенное отображение комментария в списке (до 50 символов).
-        """
-        return obj.comment[:50] + '...' if obj.comment and len(obj.comment) > 50 else obj.comment
+        return obj.comment[:50] + '...' if obj.comment and len(obj.comment) > 50 else obj.comment # В реестре отображем макс 50 символов
     
     comment_short.short_description = 'Комментарий'
 
-    # JavaScript для динамической фильтрации
+    
     class Media:
-        js = ('main/js/admin_dynamic_subcategory.js',)
+        js = ('main/js/admin_dynamic_subcategory.js',) # JavaScript для динамической фильтрации
 
     # URL для получения подкатегорий через AJAX
     def get_urls(self):
