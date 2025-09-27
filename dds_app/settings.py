@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rangefilter',  # Фильтры по диапазону дат для админки
     'main.apps.MainConfig',  # Основное приложение проекта
+    'rest_framework',  # Django REST Framework для API
 ]
 
 # Middleware для обработки запросов и ответов
